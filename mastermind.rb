@@ -1,18 +1,20 @@
 class Mastermind
 
     def initialize
-        @computer = 1
-        @human = 2
+        #creates an array of all possible combinations of 4 digit
+        #numbers consisting of (1-9)
+        @all_possible_combinations = (1111..9999).to_a.select {|num| num.digits.reverse.all? {|digit| (1..9).include?(digit)}}
     end
 
+    #random number generator
     def random_number
         puts "Enter 1 to be code-braker or 2 to be code-maker"
-        player = gets.to_i
+        @player = gets.to_i
         
-        if player == 1
-            rand(1000..9999)
-        elsif player == 2
-            puts "Create code! enter 4 random numbers"
+        if @player == 1
+            4.times.map {rand(1..9)}.join.to_i
+        elsif @player == 2
+            puts "Create code! enter 4 random numbers (1-9)"
             gets.chomp.to_i
         else
             puts "You entered a wrong choice!"
@@ -21,19 +23,32 @@ class Mastermind
 
     end
 
-    def player_guess
+    def human_guess
         puts "Guess the four digit number: "
         gets.chomp.to_i
     end
 
-    def compare_random_number_and_players_guess(random_number, player_guess)
+    def computer_guess
+        puts "computer's guess: "
+        @all_possible_combinations.sample
+    end
+
+    def players_guess
+        if @player == 2
+            computer_guess()
+        elsif @player == 1
+            human_guess()
+        end
+    end
+
+    def compare_random_number_and_players_guess(random_number, players_guess)
         number_of_guess = 0
 
         loop do
             #increments nuber of guesses each time player makes a guess
             number_of_guess+= 1
 
-            if random_number == player_guess
+            if random_number == players_guess
                 puts "You have become a mastermind!"
                 puts "It took you only #{number_of_guess} tries!"
                 break
@@ -45,12 +60,12 @@ class Mastermind
                 correct = Array.new(4) {[]}
 
                 random_number_digits = random_number.digits.reverse
-                player_guess_digits = player_guess.digits.reverse
+                players_guess_digits = players_guess.digits.reverse
 
 
                 #compare each index
                 random_number_digits.each_with_index do |digit, i|
-                    if digit == player_guess_digits[i]
+                    if digit == players_guess_digits[i]
                         #number of digits guessed correctly increments
                         correct_digits += 1
                         #stores correct digit
@@ -64,14 +79,12 @@ class Mastermind
                 elsif correct_digits == 0
                     p correct
                     puts "None of the numbers in your input match!"
-                    puts "Guess the four-digit number:"
                 else
                     p correct
                     puts "Not quite the number, but you did get #{correct_digits} digit(s) correct!"
-                    puts "Guess the four-digit number:"
                 end
 
-                player_guess = gets.chomp.to_i
+                players_guess = players_guess()
             end
         end
 
@@ -87,9 +100,9 @@ class Mastermind
         puts "--------------------------------------------------------"
 
         random_number = random_number()
-        player_guess = player_guess()
+        human_guess = players_guess()
   
-        compare_random_number_and_players_guess(random_number, player_guess)
+        compare_random_number_and_players_guess(random_number, human_guess)
 
     end
 
